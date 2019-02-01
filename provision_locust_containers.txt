@@ -1,0 +1,15 @@
+cd $WORKSPACE
+
+# Build docker image for load tests
+docker build -t ms-load .
+
+
+cd scripts
+#Run Locust master as container
+docker run -d -p 8089:8089 --net=host --name master -e LOCUST_MODE=master -e TARGET_URL=${target} -e API_KEY=${apiKey} -e USERS=${users} -e HATCH_RATE=${hatch_rate} -e RUN_TIME=${run_time} -e SLAVES=${slaves}  ms-load
+
+for i in $(seq 1 $SLAVES); do
+  port=7089
+  port=$(($port+$i))
+  docker run -d -p $port:8089 --name slave${i} -e LOCUST_MODE=slave -e MASTER_HOST=${masterhost} -e TARGET_URL=${target} -e API_KEY=${apiKey} ms-load
+done

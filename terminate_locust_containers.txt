@@ -1,0 +1,4 @@
+# removal of Locust slaves
+for i in $(seq 1 $SLAVES); do
+ docker stop slave${i}; docker rm slave${i};
+done
